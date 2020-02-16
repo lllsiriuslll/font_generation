@@ -1,0 +1,8 @@
+*.pyc
+datasets/
+train_chinese/
+train_japanese/
+experiments/
+.DS_Store
+.idea/
+*.zip
