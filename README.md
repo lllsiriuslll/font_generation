@@ -96,13 +96,13 @@ def forward(・・・):
 def d_backward(・・・):
 def g_backward(・・・):
 ```
-- ___forward___ ではinputのソース文字(_self.real\_A_)を __Generator__ モデルに渡してFake文字(_self.fake\_B_)、エンコーディングされたソース文字(_self.encoded\_real\_A_)をoutputします。生成されたFake文字(_self.fake\_B_)をもう一度 __Generator__ モデルの __Encoder__ に渡してエンコーディングされたFake文字(_self.encoded\_fake\_B_)もoutputします。文字のラベル情報ををOne Hot Vector(_self.true\_labels_)で作っておきます。
+- ___forward___ ではinputのソース文字(_real\_A_)を __Generator__ モデルに渡してFake文字(_fake\_B_)、エンコーディングされたソース文字(_encoded\_real\_A_)をoutputします。生成されたFake文字(_fake\_B_)をもう一度 __Generator__ モデルの __Encoder__ に渡してエンコーディングされたFake文字(_encoded\_fake\_B_)もoutputします。文字のラベル情報ををOne Hot Vector(_true\_labels_)で作っておきます。
 
-生成されたFake文字は __g\_backward__ でターゲット文字(_self.real\_B_)と近くなります。
+生成されたFake文字は __g\_backward__ でターゲット文字(_real\_B_)と近くなります。
 
-- ___d\_backward___ では __Discriminator__ モデルにターゲット文字(_self.real\_B_)を渡してからのoutputを1に近くさせるLoss(_d\_loss\_real_)、Fake文字(_self.fake\_B_)を渡してからのoutputを0に近くさせるLoss(_d\_loss\_fake_)、文字とある文字のラベルが一致させるカテゴリLoss(_category\_loss_)を計算し、学習モードの時、back propagationを行い、__Discriminator__ モデルを最適化します。
+- ___d\_backward___ では __Discriminator__ モデルにターゲット文字(_real\_B_)を渡してからのoutputを1に近くさせるLoss(_d\_loss\_real_)、Fake文字(_fake\_B_)を渡してからのoutputを0に近くさせるLoss(_d\_loss\_fake_)、文字とある文字のラベルが一致させるカテゴリLoss(_category\_loss_)を計算し、学習モードの時、back propagationを行い、__Discriminator__ モデルを最適化します。
 
-- ___g\_backward___ では ___forward___ で取得したエンコーディングされたソース文字(_self.encoded\_real\_A_)とエンコーディングされたFake文字(_self.encoded\_fake\_B_)の差を小さくするコンスタントLoss(_const\_loss_)、__Discriminator__ モデルに___forward___ で生成したFake文字(_self.fake\_B_)を渡してからのoutputを1に近くさせ、__Discriminator__ をだまそうとするLoss(_cheat\_loss_)、Fake文字のカテゴリLoss(_fake\_category\_loss_)、 Fake文字とターゲット文字の差を小さくするLoss(_l1\_loss_)を計算し、学習モードの時、back propagationを行い、__Generator__ モデルを最適化します。
+- ___g\_backward___ では ___forward___ で取得したエンコーディングされたソース文字(_encoded\_real\_A_)とエンコーディングされたFake文字(_encoded\_fake\_B_)の差を小さくするコンスタントLoss(_const\_loss_)、__Discriminator__ モデルに___forward___ で生成したFake文字(_fake\_B_)を渡してからのoutputを1に近くさせ、__Discriminator__ をだまそうとするLoss(_cheat\_loss_)、Fake文字のカテゴリLoss(_fake\_category\_loss_)、 Fake文字とターゲット文字の差を小さくするLoss(_l1\_loss_)を計算し、学習モードの時、back propagationを行い、__Generator__ モデルを最適化します。
 
 TensorFlowコードの以下のメソッドは
 ```py
@@ -172,7 +172,7 @@ pip install scipy==1.1.0 tensorboard==2.1 future
 ```
 ___
 ### **学習データセット作成**
-Windowsにデフォルトにある中国語Fontはスタイルがほとんど似ているように見えたのでFree Fontサイトで以下の5つのFontをダウンロードしてターゲットFontとして、Windowsの**msjc**FontをソースFontとして中国語文字データセットを作成しました。(Fontごと1000サンプリング、Train:4500データ、Val:500データ)
+Windowsにデフォルトにある漢字Fontはスタイルがほとんど似ているように見えたのでFree Fontサイトで以下の5つのFontをダウンロードしてターゲットFontとして、Windowsの**msjc**FontをソースFontとして漢字データセットを作成しました。(Fontごと1000サンプリング、Train:4500データ、Val:500データ)
 ```sh
 #dst_font
 0  HanyiSentyCrayon
@@ -244,14 +244,14 @@ PyTorchのzi2ziで学習した結果は以下のようにTensorFlowの結果と�
 <img src="assets/pytorch_200epoch_interpolate_not_train_jp.gif"  width="1000"/>
 </p>
 
-この結果を見ると学習させてない日本語文字にも中国語Fontのスタイルで文字が生成されることが確認できます。漢字には画数が多く文字の特徴量が多い、かつ文字のデータ種類も多いのでこれで学習したFontのスタイルが漢字と比べ、特徴量が少ない、シンプルな日本語文字にも表現できたと思います。この方法を利用するといろんな中国語Fontからそのスタイルの日本語Fontを簡単に作ることができると思います。しかし、生成された日本語文字を見るとまだ、不完全で生成された文字もあるし、濁点「゛」と半濁点「゜」もうまく表示できないなどまだ、課題(TensorFlow zi2ziも同じ結果)があるように見えます。
+この結果を見ると学習させてない日本語かな文字にも漢字Fontのスタイルで文字が生成されることが確認できます。漢字には画数が多く文字の特徴量が多い、かつ文字のデータ種類も多いのでこれで学習したFontのスタイルが漢字と比べ、特徴量が少ない、シンプルな日本語かな文字にも表現できたと思います。この方法を利用するといろんな漢字Fontからそのスタイルの日本語Fontを簡単に作ることができると思います。しかし、生成された日本語かな文字を見るとまだ、不完全で生成された文字もあるし、濁点「゛」と半濁点「゜」もうまく表示できないなどまだ、課題(TensorFlow zi2ziも同じ結果)があるように見えます。
 
 次は、日本語ひらがな、カタカナの文字だけを学習させて結果を確認してみました。
 ___
 ___
 ## ◆日本語(ひらがな、カタカナ)学習・確認
 ### **日本語(ひらがな、カタカナ)学習データセット作成**
-日本語ひらがな、カタカナの文字だけだとFont一つで160個ぐらいで少ないので学習が早く終わるので23ラベルに増やして(3500データ程度)学習しました。データセットは以下のFree FontサイトでのFont20個とWindowsのFont3個をターゲットFontとしてWindowsの*)**BIZ-UDGothicR** Fontをソースフォントとして利用して作成しました。日本語のひらがな、カタカナのみ(通常使用する文字を選択)リストを **charset**フォルダの**cjk.son**ファイルに追加、**font2img.py**で `--charset JP_KANA` オプション追加で日本語かなのデータセットを作成できるようにしました。**singlestyle_input_font2package.sh**の中身を修正し、手間かけず簡単にデータセットを作成しました。
+日本語ひらがな、カタカナの文字だけだとFont一つで160個ぐらいで少ないので学習が早く終わるので23ラベルに増やして(3500データ程度)学習しました。データセットは以下のFree FontサイトでのFont20個とWindowsのFont3個をターゲットFontとしてWindowsの**BIZ-UDGothicR** Fontをソースフォントとして利用して作成しました。日本語のひらがな、カタカナのみ(通常使用する文字を選択)リストを **charset**フォルダの**cjk.son**ファイルに追加、**font2img.py**で `--charset JP_KANA` オプション追加で日本語かなのデータセットを作成できるようにしました。**singlestyle_input_font2package.sh**の中身を修正し、手間かけず簡単にデータセットを作成しました。
 ```sh
 #dst_font
 0  HGRGY
@@ -365,7 +365,7 @@ ___
 
 ___
 #### Spectral Normalization の確認
-学習で `--d_norm_type sn` のオプション追加で __Discriminator__ モデルで　__BatchNorm__　の代わりに　__SpectralBatchNorm__ を使用して学習します。__Discriminator__ モデルの __BatchNorm__ の代わりに置き換えるだけで、GANが安定化、パフォーマンスもよくなるとのことで検証してみました。その結果は以下のように**いい結果**になりました。
+学習で `--d_norm_type sn` のオプション追加で __Discriminator__ モデルで　__BatchNorm__　の代わりに　__SpectralNorm__ を使用して学習します。__Discriminator__ モデルの __BatchNorm__ の代わりに置き換えるだけで、GANが安定化、パフォーマンスもよくなるとのことで検証してみました。その結果は以下のように**いい結果**になりました。
 ##### 奇数列：ターゲット文字、偶数列：生成文字
 <p align="center">
 <img src="assets/spectral_norm_1.png" width="100"/>
@@ -376,7 +376,7 @@ ___
 
 ___
 #### Conditional Batch Normalization + Spectral Normalization の確認
-Normalizaiton Moduleの検証で __Generator__ モデルでは __ConditionalBatchNorm__ を使用、__Discriminator__ モデルでは __SpectralBatchNorm__ を使用することで結果が良かったので学習で `--g_norm_type cbn --d_norm_type sn` のオプション追加で組み合わせて検証してみました。その結果は以下のように**一番いい結果**になりました。
+Normalizaiton Moduleの検証で __Generator__ モデルでは __ConditionalBatchNorm__ を使用、__Discriminator__ モデルでは __SpectralNorm__ を使用することで結果が良かったので学習で `--g_norm_type cbn --d_norm_type sn` のオプション追加で組み合わせて検証してみました。その結果は以下のように**一番いい結果**になりました。
 
 ##### PyTorch zi2zi 200epoch Japanese character(trained) Generate Result (22Labels)
 <p align="center">
@@ -447,7 +447,7 @@ class Decoder512(nn.Module):
 
 ___
 ### **⑤複数スタイルのソース文字での学習**
-今まで、__Generator__ モデルにInputされるデータは単一のFontのみで学習(ソース「1」対ターゲット「多」)してました。学習させたソース文字と似ている、例えばラベル2をソース文字として推論を行うと以下のようにソース文字の特徴も含めて文字生成ができますが、
+今まで、__Generator__ モデルにInputされるデータは単一のFontのみ、ソース「1」対ターゲット「多」で学習していました。学習させたソース文字と似ている、例えばラベル2をソース文字として推論を行うと以下のようにソース文字の特徴も含めて文字生成ができますが、
 <p align="center">
 <img src="assets/src_id2_generate.png" width="800"/>
 </p>
@@ -457,7 +457,7 @@ ___
 </p>
 これは漢字と違って、日本語の文字は数が少ない、特徴量も少ないからだと思います。
 
-ここで複数のスタイルのソース文字での学習(ソース「多」対ターゲット「多」)で学習させることで改善できるのではないかと思いました。なお、データ拡張の面でもqualityが改善されるのではないかと思い、複数のスタイルのソース文字での学習を確認しました。まず、**shell** フォルダ内の**multistyle_input_font2package.sh**のスクリプトを利用して複数スタイルのソース文字対応データセットを作りました。作った結果データは90000個ぐらいになりました。これで一旦、検証で0,1,2のラベルで学習を実行し、以下のように学習していくことを確認しました。
+ここで複数のスタイルのソース文字でソース「多」対ターゲット「多」の学習で改善できるのではないかと思いました。なお、データ拡張の面でもqualityが改善されるのではないかと思い、複数のスタイルのソース文字での学習を確認しました。まず、**shell** フォルダ内の**multistyle_input_font2package.sh**のスクリプトを利用して複数スタイルのソース文字対応データセットを作りました。作った結果データは90000個ぐらいになりました。これで一旦、検証で0,1,2のラベルで学習を実行し、以下のように学習していくことを確認しました。
 ##### 奇数列：ターゲット文字、偶数列：生成文字
 <p align="center">
 <img src="assets/multi_input_train_3ids_1.png" width="100"/>
