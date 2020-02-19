@@ -1,7 +1,7 @@
 # __Font Generation__
 
 ## ◆ Zi2Zi TensorFlow ⇒ Pytorch 変換
-zi2ziのTensorFlowコードでファイル名や、引数名、構造などを出来る限り変えないようにしてPyTorchコードへ変換しました。
+[zi2ziのTensorFlowコード](https://github.com/kaonashi-tyc/zi2zi)のファイル名や、引数名、構造などを出来る限り変えないようにしてPyTorchコードへ変換しました。
 ___
 ### File名 : __ops.py__
 このスクリプトはzi2ziモデルのgeneratorやdiscriminatorを構築するための基本オペレーターを定義します。
